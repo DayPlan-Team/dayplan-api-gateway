@@ -26,8 +26,15 @@ dependencies {
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
+    //gateway
+    implementation("org.springframework.cloud:spring-cloud-starter-gateway")
+
     //security
     implementation("org.springframework.boot:spring-boot-starter-security")
+
+    /* jetty 버전 문제 해결 */
+    implementation("jakarta.servlet:jakarta.servlet-api:5.0.0")
+
 
     //jwt
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
@@ -37,10 +44,15 @@ dependencies {
     //로그
     implementation("io.github.microutils:kotlin-logging:2.0.10")
 
+
+
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
     implementation("org.springframework.cloud:spring-cloud-starter-gateway")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.security:spring-security-test")
 }
 
 dependencyManagement {
