@@ -1,0 +1,4 @@
+gateway:
+  server:
+    user:
+      uri: "http://localhost:8080"
