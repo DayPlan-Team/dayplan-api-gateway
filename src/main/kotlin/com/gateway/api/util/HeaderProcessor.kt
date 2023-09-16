@@ -7,9 +7,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest
 object HeaderProcessor {
 
     fun validateHeaderAndGetToken(request: ServerHttpRequest): String {
-        validateRefreshTokenHeader(request)
         validateAuthorizationHeader(request)
-
         return getTokenFromAuthorizationHeader(request)
     }
 
