@@ -6,13 +6,14 @@ import org.springframework.http.server.reactive.ServerHttpRequest
 
 object HeaderProcessor {
 
-    fun validateHeaderAndGetToken(request: ServerHttpRequest): String {
+    fun validateHeaderAndGetAccessToken(request: ServerHttpRequest): String {
         validateAuthorizationHeader(request)
         return getTokenFromAuthorizationHeader(request)
     }
 
-    private fun getTokenFromAuthorizationHeader(request: ServerHttpRequest): String {
-        return request.headers[HeaderType.AUTHORIZATION_HEADER.type]!![0]
+    fun validateHeaderAndGetRefreshToken(request: ServerHttpRequest): String {
+        validateRefreshTokenHeader(request)
+        return getTokenFromAuthorizationHeader(request)
     }
 
     private fun validateAuthorizationHeader(request: ServerHttpRequest) {
@@ -25,5 +26,9 @@ object HeaderProcessor {
         request.headers[HeaderType.REFRESHTOKEN_HEADER.type]?.get(0)
             ?.let { require(it.isNotEmpty()) { throw GatewayException(GatewayExceptionCode.INVALID_REQUEST) } }
             ?: throw GatewayException(GatewayExceptionCode.INVALID_REQUEST)
+    }
+
+    private fun getTokenFromAuthorizationHeader(request: ServerHttpRequest): String {
+        return request.headers[HeaderType.AUTHORIZATION_HEADER.type]!![0]
     }
 }

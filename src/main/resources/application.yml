@@ -2,3 +2,6 @@ gateway:
   server:
     user:
       uri: "http://localhost:8080"
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}

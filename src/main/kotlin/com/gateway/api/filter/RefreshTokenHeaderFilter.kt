@@ -13,28 +13,23 @@ import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 
 @Component
-class AuthorizationHeaderFilter(
+class RefreshTokenHeaderFilter(
     private val antPathMatcher: AntPathMatcher,
 ) : AbstractGatewayFilterFactory<AuthorizationConfig>() {
 
     companion object {
         private val WHITE_LIST = arrayOf(
-            "/",
-            "/static/**",
-            "/favicon.ico",
-            "/user/login/**",
-            "/user/logout/**",
             "/user/reissue/accesstoken"
         )
     }
 
     override fun apply(config: AuthorizationConfig): GatewayFilter = GatewayFilter { exchange, chain ->
         val request = exchange.request
-        if (isWhiteList(request.uri.path)) return@GatewayFilter chain.filter(exchange)
+        if (!isWhiteList(request.uri.path)) return@GatewayFilter chain.filter(exchange)
 
         try {
-            val accessToken = config.validateAuthorizationHeaderAndGetAccessToken(request)
-            val userId = TokenParser.parseUserIdFromToken(accessToken, HeaderType.AUTHORIZATION_HEADER)
+            val accessToken = config.validateAuthorizationHeaderAndGetRefreshToken(request)
+            val userId = TokenParser.parseUserIdFromToken(accessToken, HeaderType.REFRESHTOKEN_HEADER)
 
             val modifiedRequest = exchange.request.mutate().header("UserId", userId).build()
             return@GatewayFilter chain.filter(exchange.mutate().request(modifiedRequest).build())
