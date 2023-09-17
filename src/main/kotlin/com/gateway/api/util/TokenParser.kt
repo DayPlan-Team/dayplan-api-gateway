@@ -4,17 +4,32 @@ import com.gateway.api.exception.exception.GatewayException
 import com.gateway.api.exception.exception.GatewayExceptionCode
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
+import org.springframework.beans.factory.annotation.Value
 import java.util.*
 
 object TokenParser {
 
     private const val TOKEN_PREFIX = "Bearer "
 
-    private val secretKey = System.getenv("JwtSecret").toByteArray()
+    @Value("\${jwt.secret-key}")
+    private lateinit var secretKey: String
 
-    fun parseUserIdFromToken(token: String): String {
+    fun parseUserIdFromToken(token: String, headerType: HeaderType): String {
         val claims = parseToken(token)
-        require(claims.expiration.time - Date().time >= 0) { throw GatewayException(GatewayExceptionCode.INVALID_REQUEST) }
+
+        when (headerType) {
+            HeaderType.AUTHORIZATION_HEADER -> require(claims.expiration.time - Date().time >= 0) {
+                throw GatewayException(
+                    GatewayExceptionCode.ACCESSTOKEN_EXPIRED,
+                )
+            }
+
+            HeaderType.REFRESHTOKEN_HEADER -> require(claims.expiration.time - Date().time >= 0) {
+                throw GatewayException(
+                    GatewayExceptionCode.REFRESHTOKEN_EXPIRED,
+                )
+            }
+        }
 
         return claims.subject
     }
