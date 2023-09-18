@@ -22,7 +22,7 @@ class FilterConfig(
         refreshTokenHeaderFilter: RefreshTokenHeaderFilter,
     ): RouteLocator {
         return builder.routes().route("user") { route ->
-            route.path("/user-server/user/reissue/accesstoken")
+            route.path("/user-server/user/authentication/reissue/accesstoken")
                 .filters { spec -> spec.filter(refreshTokenHeaderFilter.apply(authorizationConfig)) }
                 .uri(userServerUri)
 
