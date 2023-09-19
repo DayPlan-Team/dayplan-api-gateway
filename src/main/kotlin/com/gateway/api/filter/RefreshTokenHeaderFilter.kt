@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono
 @Component
 class RefreshTokenHeaderFilter(
     private val antPathMatcher: AntPathMatcher,
+    private val tokenParser: TokenParser,
 ) : AbstractGatewayFilterFactory<AuthorizationConfig>() {
 
     companion object {
@@ -29,7 +30,7 @@ class RefreshTokenHeaderFilter(
 
         try {
             val accessToken = config.validateAuthorizationHeaderAndGetRefreshToken(request)
-            val userId = TokenParser.parseUserIdFromToken(accessToken, HeaderType.REFRESHTOKEN_HEADER)
+            val userId = tokenParser.parseUserIdFromToken(accessToken, HeaderType.REFRESHTOKEN_HEADER)
 
             val modifiedRequest = exchange.request.mutate().header("UserId", userId).build()
             return@GatewayFilter chain.filter(exchange.mutate().request(modifiedRequest).build())

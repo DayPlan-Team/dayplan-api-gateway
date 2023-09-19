@@ -7,7 +7,9 @@ import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.stereotype.Component
 
 @Component
-class AuthorizationProdConfig : AuthorizationConfig {
+class AuthorizationProdConfig(
+    private val tokenParser: TokenParser,
+) : AuthorizationConfig {
 
     override fun validateAuthorizationHeaderAndGetAccessToken(request: ServerHttpRequest): String {
         return HeaderProcessor.validateHeaderAndGetAccessToken(request)
@@ -18,7 +20,7 @@ class AuthorizationProdConfig : AuthorizationConfig {
     }
 
     override fun parserUserId(token: String, headerType: HeaderType): String {
-        return TokenParser.parseUserIdFromToken(token, headerType)
+        return tokenParser.parseUserIdFromToken(token, headerType)
     }
 
 }

@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono
 @Component
 class AuthorizationHeaderFilter(
     private val antPathMatcher: AntPathMatcher,
+    private val tokenParser: TokenParser,
 ) : AbstractGatewayFilterFactory<AuthorizationConfig>() {
 
     companion object {
@@ -34,7 +35,7 @@ class AuthorizationHeaderFilter(
 
         try {
             val accessToken = config.validateAuthorizationHeaderAndGetAccessToken(request)
-            val userId = TokenParser.parseUserIdFromToken(accessToken, HeaderType.AUTHORIZATION_HEADER)
+            val userId = tokenParser.parseUserIdFromToken(accessToken, HeaderType.AUTHORIZATION_HEADER)
 
             val modifiedRequest = exchange.request.mutate().header("UserId", userId).build()
             return@GatewayFilter chain.filter(exchange.mutate().request(modifiedRequest).build())
