@@ -1,20 +1,17 @@
 package com.gateway.api.exception.exception
 
-import org.springframework.http.HttpStatus
-
 class GatewayException(
-    private val errorCode: GatewayExceptionCode,
+    private val code: GatewayExceptionCode,
 ) : RuntimeException() {
 
     override val cause: Throwable
-        get() = Throwable(errorCode.code)
-
+        get() = Throwable(code.errorCode)
     override val message: String
-        get() = errorCode.message
+        get() = code.message
 
-    val code: String
-        get() = errorCode.code
+    val status: Int
+        get() = code.status
 
-    val status: HttpStatus
-        get() = errorCode.httpStatus
+    val errorCode: String
+        get() = code.errorCode
 }

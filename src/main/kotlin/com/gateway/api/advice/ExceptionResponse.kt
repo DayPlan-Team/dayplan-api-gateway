@@ -1,6 +1,7 @@
 package com.gateway.api.advice
 
-data class ErrorResponse(
+data class ExceptionResponse(
+    val status: Int,
     val code: String,
     val message: String,
 )

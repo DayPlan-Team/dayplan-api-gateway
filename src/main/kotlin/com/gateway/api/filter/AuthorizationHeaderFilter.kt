@@ -2,6 +2,7 @@ package com.gateway.api.filter
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.gateway.api.config.AuthorizationConfig
+import com.gateway.api.exception.exception.GatewayException
 import com.gateway.api.util.HeaderType
 import com.gateway.api.util.TokenParser
 import org.springframework.cloud.gateway.filter.GatewayFilter
@@ -16,6 +17,7 @@ import reactor.core.publisher.Mono
 class AuthorizationHeaderFilter(
     private val antPathMatcher: AntPathMatcher,
     private val tokenParser: TokenParser,
+    private val errorFilter: ErrorFilter,
 ) : AbstractGatewayFilterFactory<AuthorizationConfig>() {
 
     companion object {
@@ -25,7 +27,7 @@ class AuthorizationHeaderFilter(
             "/favicon.ico",
             "/user/login/**",
             "/user/logout/**",
-            "/user/reissue/accesstoken"
+            "/user/authentication/reissue/accesstoken"
         )
     }
 
@@ -41,17 +43,13 @@ class AuthorizationHeaderFilter(
             return@GatewayFilter chain.filter(exchange.mutate().request(modifiedRequest).build())
 
         } catch (e: JsonProcessingException) {
-            return@GatewayFilter onError(exchange)
+            return@GatewayFilter errorFilter.onError(exchange, e)
+        } catch (e: GatewayException) {
+            return@GatewayFilter errorFilter.onError(exchange, e)
         }
     }
 
     private fun isWhiteList(requestURI: String): Boolean {
         return WHITE_LIST.any { antPathMatcher.match(it, requestURI) }
-    }
-
-    private fun onError(exchange: ServerWebExchange): Mono<Void> {
-        val response = exchange.response
-        response.setStatusCode(HttpStatus.UNAUTHORIZED)
-        return response.setComplete()
     }
 }
