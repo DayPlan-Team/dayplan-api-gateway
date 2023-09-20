@@ -1,8 +1,10 @@
 package com.gateway.api.util
 
+import com.fasterxml.jackson.core.JsonProcessingException
 import com.gateway.api.exception.exception.GatewayException
 import com.gateway.api.exception.exception.GatewayExceptionCode
 import io.jsonwebtoken.Claims
+import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
@@ -27,30 +29,23 @@ class TokenParser : InitializingBean {
 
 
     fun parseUserIdFromToken(token: String, headerType: HeaderType): String {
-        val claims = parseToken(token)
-
-        when (headerType) {
-            HeaderType.AUTHORIZATION_HEADER -> require(claims.expiration.time - Date().time >= 0) {
-                throw GatewayException(
-                    GatewayExceptionCode.ACCESSTOKEN_EXPIRED,
-                )
-            }
-
-            HeaderType.REFRESHTOKEN_HEADER -> require(claims.expiration.time - Date().time >= 0) {
-                throw GatewayException(
-                    GatewayExceptionCode.REFRESHTOKEN_EXPIRED,
-                )
-            }
-        }
-
+        val claims = parseToken(token, headerType)
         return claims.subject
     }
 
-    private fun parseToken(token: String): Claims {
+    private fun parseToken(token: String, headerType: HeaderType): Claims {
         val refinedToken = removeTokenPrefix(token)
-        log.info("refinedToken = $refinedToken")
 
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(refinedToken).body
+        try {
+            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(refinedToken).body
+        } catch (e: JsonProcessingException) {
+            throw GatewayException(GatewayExceptionCode.INVALID_TOKEN_FORMAT_REQUEST)
+        } catch (e: ExpiredJwtException) {
+            when(headerType) {
+                HeaderType.AUTHORIZATION_HEADER -> throw GatewayException(GatewayExceptionCode.ACCESSTOKEN_EXPIRED)
+                HeaderType.REFRESHTOKEN_HEADER -> throw GatewayException(GatewayExceptionCode.REFRESHTOKEN_EXPIRED)
+            }
+        }
     }
 
     private fun removeTokenPrefix(token: String): String {
