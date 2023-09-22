@@ -7,11 +7,8 @@ import com.gateway.api.util.HeaderType
 import com.gateway.api.util.TokenParser
 import org.springframework.cloud.gateway.filter.GatewayFilter
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.util.AntPathMatcher
-import org.springframework.web.server.ServerWebExchange
-import reactor.core.publisher.Mono
 
 @Component
 class AuthorizationHeaderFilter(
