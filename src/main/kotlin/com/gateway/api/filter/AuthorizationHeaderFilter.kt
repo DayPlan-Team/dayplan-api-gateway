@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.gateway.api.config.AuthorizationConfig
 import com.gateway.api.exception.exception.GatewayException
 import com.gateway.api.util.HeaderType
+import com.gateway.api.util.Logger
 import com.gateway.api.util.TokenParser
 import org.springframework.cloud.gateway.filter.GatewayFilter
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory
@@ -17,7 +18,7 @@ class AuthorizationHeaderFilter(
     private val errorFilter: ErrorFilter,
 ) : AbstractGatewayFilterFactory<AuthorizationConfig>() {
 
-    companion object {
+    companion object : Logger() {
         private val WHITE_LIST = arrayOf(
             "/",
             "/static/**",
@@ -30,6 +31,8 @@ class AuthorizationHeaderFilter(
 
     override fun apply(config: AuthorizationConfig): GatewayFilter = GatewayFilter { exchange, chain ->
         val request = exchange.request
+        log.info("header request = ${request.uri}")
+
         if (isWhiteList(request.uri.path)) return@GatewayFilter chain.filter(exchange)
 
         try {
